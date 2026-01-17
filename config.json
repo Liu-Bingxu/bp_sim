@@ -1,0 +1,20 @@
+{
+    "test_fn_index":{
+        "uftb": 0
+    },
+    "itrace file name": "macrobench-itrace.db",
+    "bin file name": "microbench-riscv64-nemu.bin",
+    "bp_sim func": "uftb",
+    "uftb":{
+        "ftq_entry_num": 32,
+        "ftb_entry_num": 32,
+        "ftb_entry_num_bit": 5,
+        "predict_size": 32,
+        "predict_bit_size": 5,
+        "tag_bit_size": 20,
+        "tag_start_bit": 1,
+        "ras_max_size": 16,
+        "sq_max_size": 32,
+        "start_pc": "0x80000000"
+    }
+}
