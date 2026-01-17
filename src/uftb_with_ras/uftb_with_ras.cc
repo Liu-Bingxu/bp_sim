@@ -127,7 +127,7 @@ void uftb_with_ras_class::uftb_predict(ftq_class &ftq){
                     entry.end_pc = end_pc;
                     entry.is_tail = true;
                     start_pc = next_pc;
-                }else if(uftb_entrys[i].always_tacken[0] | (uftb_entrys[i].tail_slot.valid & (uftb_entrys[i].tail_slot.bit2_cnt > 1))){
+                }else if(uftb_entrys[i].always_tacken[1] | (uftb_entrys[i].tail_slot.valid & (uftb_entrys[i].tail_slot.bit2_cnt > 1))){
                     //? tail_slot jump
                     uint64_t end_pc = (start_pc + uftb_entrys[i].tail_slot.offset);
                     if(uftb_entrys[i].tail_slot.is_rvc)
@@ -169,10 +169,22 @@ void uftb_with_ras_class::uftb_predict(ftq_class &ftq){
 void uftb_with_ras_class::update(ftq_entry *result){
     if(result->hit){
         uftb_entrys[result->hit_sel] = result->old_entry;
+        uftb_plru->plru_update(result->hit_sel);
     }else if(result->old_entry.valid){
-        uint32_t way_sel = get_way();
-        uftb_entrys[way_sel] = result->old_entry;
-        uftb_plru->plru_update(way_sel);
+        uint32_t i = 0;
+        uint64_t tag = ((result->start_pc >> tag_start_bit) & (((uint64_t)0x1 << tag_bit_size) - (uint32_t)1));
+        for(i = 0; i < uftb_cnt; i++){
+            if(uftb_entrys[i].tag == tag)
+                break;
+        }
+        if(i != uftb_cnt){
+            uftb_entrys[i] = result->old_entry;
+            uftb_plru->plru_update(i);
+        }else{
+            uint32_t way_sel = get_way();
+            uftb_entrys[way_sel] = result->old_entry;
+            uftb_plru->plru_update(way_sel);
+        }
     }
 }
 
