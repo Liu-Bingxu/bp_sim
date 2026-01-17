@@ -17,9 +17,8 @@ private:
     ftq_class       &ftq;
     uint8_t         *mmap_ptr;
     uint64_t         pc_bias;
-    test_base_class &test;
 public:
-    ifu_class(bool rvi_valid, ftq_class &ftq_i, uint8_t *mmap_ptr_i, uint64_t pc_bias_i, test_base_class &test_i);
+    ifu_class(bool rvi_valid, ftq_class &ftq_i, uint8_t *mmap_ptr_i, uint64_t pc_bias_i);
     ~ifu_class();
     void set_rvi_status(bool rvi_valid);
     bool get_rvi_status();

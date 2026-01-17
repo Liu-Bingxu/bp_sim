@@ -2,7 +2,7 @@
 #define __TEST_BASE_H__
 
 #include "stdint.h"
-#include "ftq.h"
+#include "ftq_entry.h"
 
 class test_base_class{
 public:

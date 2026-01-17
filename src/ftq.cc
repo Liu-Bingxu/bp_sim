@@ -1,6 +1,6 @@
 #include "ftq.h"
 
-ftq_class::ftq_class(uint32_t count){
+ftq_class::ftq_class(uint32_t count, test_base_class &test_top_i):test_top(test_top_i){
     max_size = count;
     entry = (ftq_entry *)calloc(sizeof(ftq_entry) * count, 1);
     bpu_w_ptr = 0;
@@ -63,17 +63,28 @@ void ftq_class::set_plru_ptr(plru_class *plru_i){
     plru = plru_i;
 }
 
-void ftq_class::precheck_restore(ftq_entry *entry_i){
+void ftq_class::precheck_restore(ftq_entry *entry_i, uint64_t pc, uint64_t *pop_pc, bool is_call, bool is_ret){
     bpu_w_ptr = ((ifu_r_ptr + 1) % max_size);
     cnt = ((bpu_w_ptr + max_size - commit_ptr) % max_size);
     ifu_not_use_cnt = 1;
     plru->plru_restore(entry_i->plru_status);
+    test_top.update_pc(pc, pop_pc, is_call, is_ret, true);
 }
 
-void ftq_class::commit_restore(ftq_entry *entry_i){
+void ftq_class::commit_restore(ftq_entry *entry_i, uint64_t pc, uint64_t *pop_pc, bool is_call, bool is_ret){
     bpu_w_ptr = ((commit_ptr + 1) % max_size);
     ifu_r_ptr = bpu_w_ptr;
     cnt = 1;
     ifu_not_use_cnt = 0;
     plru->plru_restore(entry_i->plru_status);
+    test_top.update_pc(pc, pop_pc, is_call, is_ret, false);
 }
+
+void ftq_class::precheck_update_ras(uint64_t push_pc, bool is_call){
+    test_top.precheck_update_ras(push_pc, is_call);
+}
+
+void ftq_class::commit_update_ras(uint64_t push_pc, bool is_call){
+    test_top.commit_update_ras(push_pc, is_call);
+}
+

@@ -217,9 +217,9 @@ int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
 
     mmap_ptr = (uint8_t *)mmap(NULL, (size_t)bin_size, PROT_READ, MAP_SHARED, fileno(bin_fp), 0);
 
-    ftq_class  uftb_ftq(ftq_entry_num);
     uftb_class uftb(ftb_entry_num, ftb_entry_num_bit, start_pc);
-    ifu_class  uftb_ifu(false, uftb_ftq, mmap_ptr, start_pc, uftb);
+    ftq_class  uftb_ftq(ftq_entry_num, uftb);
+    ifu_class  uftb_ifu(false, uftb_ftq, mmap_ptr, start_pc);
     uftb_ftq.set_plru_ptr(uftb.get_uftb_plru());
     exu_class  uftb_exu(uftb_ftq, uftb, db_fp, predict_bit_size, uftb_ifu);
 
