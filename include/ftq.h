@@ -32,8 +32,8 @@ public:
     ftq_entry *ifu_queue_get_top();
     ftq_entry *commit_queue_get_top();
     void set_plru_ptr(plru_class *plru_i);
-    void precheck_restore(ftq_entry *entry_i, uint64_t pc, uint64_t *pop_pc, bool is_call, bool is_ret);
-    void commit_restore(ftq_entry *entry_i, uint64_t pc, uint64_t *pop_pc, bool is_call, bool is_ret);
+    void precheck_restore(ftq_entry *entry_i, uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret);
+    void commit_restore(ftq_entry *entry_i, uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret);
     void precheck_update_ras(uint64_t push_pc, bool is_call);
     void commit_update_ras(uint64_t push_pc, bool is_call);
 };

@@ -186,7 +186,7 @@ void uftb_class::update(ftq_entry *result){
     }
 }
 
-void uftb_class::update_pc(uint64_t pc_i, uint64_t *pop_pc, VARIABLE_IS_NOT_USED bool is_call, VARIABLE_IS_NOT_USED bool is_ret, VARIABLE_IS_NOT_USED bool is_precheck){
+void uftb_class::update_pc(uint64_t pc_i, VARIABLE_IS_NOT_USED uint64_t push_pc, uint64_t *pop_pc, VARIABLE_IS_NOT_USED bool is_call, VARIABLE_IS_NOT_USED bool is_ret, VARIABLE_IS_NOT_USED bool is_precheck){
     pc = pc_i;
     if(pop_pc != NULL)
         *pop_pc = pc;

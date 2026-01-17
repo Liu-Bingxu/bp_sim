@@ -22,7 +22,7 @@ public:
         return uftb_plru;
     };
     virtual void update(ftq_entry *result);
-    virtual void update_pc(uint64_t pc_i, uint64_t *pop_pc, bool is_call, bool is_ret, bool is_precheck);
+    virtual void update_pc(uint64_t pc_i, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret, bool is_precheck);
     virtual void precheck_update_ras(uint64_t push_pc, bool is_call);
     virtual void commit_update_ras(uint64_t push_pc, bool is_call);
 };

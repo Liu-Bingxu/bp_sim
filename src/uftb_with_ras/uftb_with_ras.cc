@@ -120,7 +120,7 @@ void uftb_with_ras_class::uftb_predict(ftq_class &ftq){
                         next_pc--;
                     next_pc = (((next_pc << 20) + uftb_entrys[i].tail_slot.next_low) << 1);
                     if(uftb_entrys[i].is_call)
-                        uftb_ras->pred_push(next_pc);
+                        uftb_ras->pred_push(end_pc);
                     else if(uftb_entrys[i].is_ret)
                         next_pc = uftb_ras->pred_pop();
                     entry.token = true;
@@ -188,7 +188,7 @@ void uftb_with_ras_class::update(ftq_entry *result){
     }
 }
 
-void uftb_with_ras_class::update_pc(uint64_t pc_i, uint64_t *pop_pc, bool is_call, bool is_ret, bool is_precheck){
+void uftb_with_ras_class::update_pc(uint64_t pc_i, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret, bool is_precheck){
     pc = pc_i;
     uint64_t ret_pc = pc;
 
@@ -197,7 +197,7 @@ void uftb_with_ras_class::update_pc(uint64_t pc_i, uint64_t *pop_pc, bool is_cal
         pc = ret_pc;
         uftb_ras->precheck_restore();
     }else if(is_precheck & is_call){
-        uftb_ras->precheck_push(pc_i);
+        uftb_ras->precheck_push(push_pc);
         uftb_ras->precheck_restore();
     }else if(is_precheck){
         uftb_ras->precheck_restore();
@@ -206,7 +206,7 @@ void uftb_with_ras_class::update_pc(uint64_t pc_i, uint64_t *pop_pc, bool is_cal
         pc = ret_pc;
         uftb_ras->commit_restore();
     }else if(is_call){
-        uftb_ras->commit_push(pc_i);
+        uftb_ras->commit_push(push_pc);
         uftb_ras->commit_restore();
     }else{
         uftb_ras->commit_restore();
