@@ -4,6 +4,12 @@
 #include "string.h"
 #include "stdint.h"
 
+#ifdef __GNUC__
+#define VARIABLE_IS_NOT_USED __attribute__ ((unused))
+#else
+#define VARIABLE_IS_NOT_USED
+#endif
+
 static uint64_t inst_cnt  = 0;
 static uint64_t pred_miss = 0;
 
@@ -11,7 +17,7 @@ static uint64_t pred_miss = 0;
 // 0x40:jump
 
 // 无BP性能仿真测试
-int bp_sim_no_bp(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
+int bp_sim_no_bp(VARIABLE_IS_NOT_USED FILE *bin_fp, FILE *db_fp, VARIABLE_IS_NOT_USED cJSON *conf_json){
     size_t ret_f = 0;
     uint64_t pc = 0;
     char type = 0;

@@ -62,7 +62,6 @@ WARNINGS        := -Wall -Wextra \
         			-Wsign-conversion \
     				-Wdouble-promotion \
 					-Wno-narrowing	\
-					-Wno-unused-parameter	\
         			-Werror
 
 # 公共编译选项
