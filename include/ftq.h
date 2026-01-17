@@ -12,10 +12,9 @@ typedef struct {
     uint64_t    start_pc;
 
     // 以下纯粹为了仿真方便
-    inst_decode *issue_inst;
+    inst_decode  issue_inst[DECODE_CNT];
     uint32_t     issue_cnt;
     uint64_t     end_pc;
-    bool        rvi_valid;
 
     bool        first_pred_flag;
     bool        hit;

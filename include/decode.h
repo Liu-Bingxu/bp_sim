@@ -13,13 +13,14 @@ typedef struct {
     uint32_t    offset;
     bool        is_rvc;
     uint64_t    inst_pc;
-    uint64_t    inst_next_pc;
     uint32_t    inst;
 }inst_decode;
 
+#define DECODE_CNT 32
+
 typedef struct {
     uint32_t    cnt;
-    inst_decode *decode;
+    inst_decode decode[DECODE_CNT];
     bool        rvi_valid;
     bool        has_one_branch;
     uint32_t    one_branch_index;

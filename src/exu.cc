@@ -140,8 +140,8 @@ bool exu_class::execute(uint64_t &inst_cnt, uint64_t &pred_miss){
             }
         }
         test.update(result);
-        free(result->issue_inst);
-        result->issue_inst = NULL;
+        // free(result->issue_inst);
+        // result->issue_inst = NULL;
         ftq.dequeue();
     }
     return false;

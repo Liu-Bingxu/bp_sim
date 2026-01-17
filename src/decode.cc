@@ -1,5 +1,6 @@
 #include "decode.h"
 #include "stdlib.h"
+#include "assert.h"
 
 #define BITMASK(bits) ((1ull << (bits)) - 1)
 #define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
@@ -100,7 +101,8 @@ void predecode(uint8_t *ptr, uint32_t predict_size, uint64_t start_pc, predecode
     if(use_size > predict_size){
         next_rvi_valid = true;
     }
-    decode_result->decode = (inst_decode *)calloc(sizeof(inst_decode) * inst_cnt, 1);
+    // decode_result->decode = (inst_decode *)calloc(sizeof(inst_decode) * inst_cnt, 1);
+    assert(inst_cnt <= DECODE_CNT);
     decode_result->cnt    = inst_cnt;
     use_size = 0;
     inst_cnt = 0;

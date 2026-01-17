@@ -168,14 +168,14 @@ ifu_class::ifu_class(bool rvi_valid, ftq_class &ftq_i, uint8_t *mmap_ptr_i, uint
     decode_result.has_two_branch = false;
     decode_result.has_three_branch = false;
     decode_result.rvi_valid = rvi_valid;
-    decode_result.decode = NULL;
+    // decode_result.decode = NULL;
     mmap_ptr = mmap_ptr_i;
     pc_bias = pc_bias_i;
 }
 
 ifu_class::~ifu_class(){
-    if(decode_result.decode != NULL)
-        free(decode_result.decode);
+    // if(decode_result.decode != NULL)
+    //     free(decode_result.decode);
 }
 
 void ifu_class::set_rvi_status(bool rvi_valid){
@@ -189,7 +189,6 @@ bool ifu_class::get_rvi_status(){
 void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, uint32_t predict_bit_size, uint32_t predict_size){
     while(ftq.ifu_empty() == false){
         ftq_entry *result = ftq.ifu_queue_get_top();
-        result->rvi_valid = decode_result.rvi_valid;
         predecode(mmap_ptr + result->start_pc - pc_bias, predict_size, result->start_pc, &decode_result);
         precheck(&decode_result, result, &check_result, tag_start_bit, tag_bit_size, predict_bit_size, predict_size);
         /*
@@ -293,10 +292,13 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
             result->old_entry.tail_slot.bit2_cnt = 0;
         }
         result->first_pred_flag = check_result.update;
-        if(result->issue_inst != NULL){
-            free(result->issue_inst);
+        // if(result->issue_inst != NULL){
+        //     free(result->issue_inst);
+        // }
+        // result->issue_inst = decode_result.decode;
+        for(uint32_t i = 0; i < DECODE_CNT; i++){
+            result->issue_inst[i] = decode_result.decode[i];
         }
-        result->issue_inst = decode_result.decode;
         uint32_t inst_index = 0;
         uint32_t inst_count = 0;
         while(inst_index < decode_result.cnt){
@@ -305,7 +307,7 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
             inst_index++;
         }
         result->issue_cnt = inst_count;
-        decode_result.decode = NULL;
+        // decode_result.decode = NULL;
         if(result->token | decode_result.has_three_branch){
             decode_result.rvi_valid = false;
         }

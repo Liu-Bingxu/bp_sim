@@ -9,17 +9,17 @@ ftq_class::ftq_class(uint32_t count){
     cnt   = 0;
     ifu_not_use_cnt = 0;
     plru = NULL;
-    for(uint32_t i = 0; i < max_size; i++){
-        entry[i].issue_inst = NULL;
-    }
+    // for(uint32_t i = 0; i < max_size; i++){
+    //     entry[i].issue_inst = NULL;
+    // }
 }
 
 ftq_class::~ftq_class(){
     free(entry);
-    for(uint32_t i = 0; i < max_size; i++){
-        if(entry[i].issue_inst != NULL)
-            free(entry[i].issue_inst);
-    }
+    // for(uint32_t i = 0; i < max_size; i++){
+    //     if(entry[i].issue_inst != NULL)
+    //         free(entry[i].issue_inst);
+    // }
 }
 
 bool ftq_class::ifu_empty(){

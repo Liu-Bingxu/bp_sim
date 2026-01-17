@@ -79,7 +79,7 @@ void uftb_class::uftb_predict(ftq_class &ftq){
         entry.old_entry.is_call   = false;
         entry.old_entry.is_jalr   = false;
         entry.old_entry.is_ret    = false;
-        entry.issue_inst = NULL;
+        // entry.issue_inst = NULL;
         for(uint32_t i = 0; i < uftb_cnt; i++){
             if(uftb_entrys[i].valid & (uftb_entrys[i].tag == tag)){
                 //? hit
