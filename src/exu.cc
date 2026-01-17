@@ -14,22 +14,6 @@ bool exu_class::execute(uint64_t &inst_cnt, uint64_t &pred_miss){
         size_t ret_f = 0;
         char type = 0;
 
-        uint64_t br_addr = (pc >> 13);
-        uint64_t tail_addr = (pc >> 21);
-
-        if(result->old_entry.br_slot.carry[0])
-            br_addr += 1;
-        else if(result->old_entry.br_slot.carry[1])
-            br_addr -= 1;
-
-        if(result->old_entry.tail_slot.carry[0])
-            tail_addr += 1;
-        else if(result->old_entry.tail_slot.carry[1])
-            tail_addr -= 1;
-
-        br_addr = (((br_addr << 12) + (uint64_t)result->old_entry.br_slot.next_low) << 1);
-        tail_addr = (((tail_addr << 20) + (uint64_t)result->old_entry.tail_slot.next_low) << 1);
-        uint64_t token_next_addr = (result->is_tail) ? tail_addr : br_addr;
         for(uint32_t inst_index = 0; inst_index < result->issue_cnt; inst_index++){
             assert(result->issue_inst[inst_index].inst_pc < result->end_pc);
             uint32_t token_offset = (result->is_tail) ? result->old_entry.tail_slot.offset : result->old_entry.br_slot.offset;
@@ -122,7 +106,7 @@ bool exu_class::execute(uint64_t &inst_cnt, uint64_t &pred_miss){
                     ifu.set_rvi_status(false);
                     test.update_pc(pc);
                     pred_miss++;
-                }else if(token_next_addr != pc){
+                }else if(result->next_pc != pc){
                     ftq.commit_restore(result);
                     ifu.set_rvi_status(false);
                     test.update_pc(pc);

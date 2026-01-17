@@ -233,6 +233,7 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     result->end_pc = end_pc;
                     ftq.precheck_restore(result);
                     test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr);
+                    result->next_pc = decode_result.decode[decode_result.jump_index].branch_addr;
                 }
                 else if(decode_result.has_jump & (check_result.new_entry.is_ret == false)){
                     result->old_entry = check_result.new_entry;
@@ -241,6 +242,7 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     result->end_pc = end_pc;
                     ftq.precheck_restore(result);
                     test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr);
+                    result->next_pc = decode_result.decode[decode_result.jump_index].branch_addr;
                 }else{
                     result->old_entry = check_result.new_entry;
                     result->token = false;
@@ -250,6 +252,7 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     if(decode_result.has_three_branch){
                         decode_result.rvi_valid = false;
                     }
+                    result->next_pc = block_pc;
                 }
             }else if((check_result.new_entry.valid) & (result->hit == true)){
                 //? 匹配错误，别名问题
@@ -260,6 +263,7 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     result->end_pc = end_pc;
                     ftq.precheck_restore(result);
                     test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr);
+                    result->next_pc = decode_result.decode[decode_result.jump_index].branch_addr;
                 }
                 else if(decode_result.has_jump & (check_result.new_entry.is_ret == false)){
                     result->old_entry    = check_result.new_entry;
@@ -268,6 +272,8 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     result->end_pc = end_pc;
                     ftq.precheck_restore(result);
                     test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr);
+                    result->next_pc = decode_result.decode[decode_result.jump_index].branch_addr;
+                    
                 }else{
                     result->old_entry = check_result.new_entry;
                     result->token = false;
@@ -277,6 +283,7 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     if(decode_result.has_three_branch){
                         decode_result.rvi_valid = false;
                     }
+                    result->next_pc = result->end_pc;
                 }
             }else if(result->hit){
                 //? 别名
@@ -285,6 +292,7 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                 result->end_pc = result->start_pc + predict_size;
                 ftq.precheck_restore(result);
                 test.update_pc(result->start_pc + predict_size);
+                result->next_pc = result->end_pc;
             }
             result->old_entry.always_tacken[0] = false;
             result->old_entry.always_tacken[1] = false;

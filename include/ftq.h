@@ -12,6 +12,7 @@
 typedef struct {
     // start_pc必须全部记下
     uint64_t    start_pc;
+    uint64_t    next_pc;
 
     // 以下纯粹为了仿真方便
     inst_decode  issue_inst[DECODE_CNT];

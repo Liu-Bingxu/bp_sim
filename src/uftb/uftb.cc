@@ -60,6 +60,7 @@ void uftb_class::uftb_predict(ftq_class &ftq){
         entry.is_tail = false;
         entry.start_pc = start_pc;
         entry.end_pc = start_pc + predict_size;
+        entry.next_pc = entry.end_pc;
         entry.first_pred_flag = false;
         // entry.plru_status = (uint8_t *)malloc(sizeof(uint8_t) * uftb_plru->get_plru_size());
         assert(uftb_plru->get_plru_size() <= PLRU_CNT);
@@ -145,6 +146,7 @@ void uftb_class::uftb_predict(ftq_class &ftq){
                     start_pc = end_pc;
                 }
                 uftb_plru->plru_update(i);
+                entry.next_pc = start_pc;
             }
         }
         if(entry.hit == false){
