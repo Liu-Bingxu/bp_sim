@@ -14,8 +14,6 @@ static uint32_t predict_size;
 static uint32_t predict_bit_size;
 static uint32_t tag_bit_size;
 static uint32_t tag_start_bit;
-static uint32_t ras_max_size;
-static uint32_t sq_max_size;
 
 static uint64_t inst_cnt  = 0;
 static uint64_t pred_miss = 0;
@@ -31,17 +29,15 @@ static uint64_t pred_miss = 0;
 // 0x80:rvc
 // 0x40:jump
 
-uftb_class::uftb_class(uint32_t ftb_entry_num_i, uint32_t ftb_entry_num_bit_i, uint32_t ras_max_size_i, uint32_t sq_max_size_i, uint32_t pc_i){
+uftb_class::uftb_class(uint32_t ftb_entry_num_i, uint32_t ftb_entry_num_bit_i, uint32_t pc_i){
     pc = pc_i;
     uftb_cnt = ftb_entry_num_i;
     uftb_entrys = (ftb_entry *)calloc(sizeof(ftb_entry) * ftb_entry_num_i, 1);
-    uftb_ras = new ras_class(ras_max_size_i, sq_max_size_i);
     uftb_plru = new plru_class(ftb_entry_num_bit_i);
 }
 
 uftb_class::~uftb_class(){
     free(uftb_entrys);
-    delete uftb_ras;
     delete uftb_plru;
 }
 
@@ -189,10 +185,6 @@ int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
     tag_bit_size = cJSON_GetNumberValue(temp);
     temp = cJSON_GetObjectItem(conf_json, "tag_start_bit");
     tag_start_bit = cJSON_GetNumberValue(temp);
-    temp = cJSON_GetObjectItem(conf_json, "ras_max_size");
-    ras_max_size = cJSON_GetNumberValue(temp);
-    temp = cJSON_GetObjectItem(conf_json, "sq_max_size");
-    sq_max_size = cJSON_GetNumberValue(temp);
 
     temp = cJSON_GetObjectItem(conf_json, "start_pc");
     char *start_pc_str = cJSON_GetStringValue(temp);
@@ -210,7 +202,7 @@ int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
     mmap_ptr = (uint8_t *)mmap(NULL, (size_t)bin_size, PROT_READ, MAP_SHARED, fileno(bin_fp), 0);
 
     ftq_class  uftb_ftq(ftq_entry_num);
-    uftb_class uftb(ftb_entry_num, ftb_entry_num_bit, ras_max_size, sq_max_size, start_pc);
+    uftb_class uftb(ftb_entry_num, ftb_entry_num_bit, start_pc);
     ifu_class  uftb_ifu(false, uftb_ftq, mmap_ptr, start_pc, uftb);
     uftb_ftq.set_plru_ptr(uftb.get_uftb_plru());
     exu_class  uftb_exu(uftb_ftq, uftb, db_fp, predict_bit_size, uftb_ifu);
