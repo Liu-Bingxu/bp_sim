@@ -1,15 +1,28 @@
 {
     "test_fn_index":{
         "no_bp": 0,
-        "uftb": 1
+        "uftb": 1,
+        "uftb_with_ras" : 2
     },
     "itrace file name": "macrobench-itrace.db",
     "bin file name": "microbench-riscv64-nemu.bin",
-    "bp_sim func": ["no_bp", "uftb"],
+    "bp_sim func": ["no_bp", "uftb", "uftb_with_ras"],
     "no_bp":{
         "start_pc": "0x80000000"
     },
     "uftb":{
+        "ftq_entry_num": 32,
+        "ftb_entry_num": 32,
+        "ftb_entry_num_bit": 5,
+        "predict_size": 32,
+        "predict_bit_size": 5,
+        "tag_bit_size": 20,
+        "tag_start_bit": 1,
+        "ras_max_size": 16,
+        "sq_max_size": 32,
+        "start_pc": "0x80000000"
+    },
+    "uftb_with_ras":{
         "ftq_entry_num": 32,
         "ftb_entry_num": 32,
         "ftb_entry_num_bit": 5,

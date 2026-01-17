@@ -5,14 +5,8 @@
 #include <sys/mman.h>
 #include "ifu.h"
 #include "exu.h"
-#include "uftb/uftb.h"
+#include "uftb_with_ras/uftb_with_ras.h"
 #include "assert.h"
-
-#ifdef __GNUC__
-#define VARIABLE_IS_NOT_USED __attribute__ ((unused))
-#else
-#define VARIABLE_IS_NOT_USED
-#endif
 
 static uint32_t ftq_entry_num;
 static uint32_t ftb_entry_num;
@@ -21,6 +15,8 @@ static uint32_t predict_size;
 static uint32_t predict_bit_size;
 static uint32_t tag_bit_size;
 static uint32_t tag_start_bit;
+static uint32_t ras_max_size;
+static uint32_t sq_max_size;
 
 static uint64_t inst_cnt  = 0;
 static uint64_t pred_miss = 0;
@@ -36,19 +32,21 @@ static uint64_t pred_miss = 0;
 // 0x80:rvc
 // 0x40:jump
 
-uftb_class::uftb_class(uint32_t ftb_entry_num_i, uint32_t ftb_entry_num_bit_i, uint32_t pc_i){
+uftb_with_ras_class::uftb_with_ras_class(uint32_t ftb_entry_num_i, uint32_t ftb_entry_num_bit_i, uint32_t ras_max_size_i, uint32_t sq_max_size_i, uint32_t pc_i){
     pc = pc_i;
     uftb_cnt = ftb_entry_num_i;
     uftb_entrys = (ftb_entry *)calloc(sizeof(ftb_entry) * ftb_entry_num_i, 1);
+    uftb_ras = new ras_class(ras_max_size_i, sq_max_size_i);
     uftb_plru = new plru_class(ftb_entry_num_bit_i);
 }
 
-uftb_class::~uftb_class(){
+uftb_with_ras_class::~uftb_with_ras_class(){
     free(uftb_entrys);
+    delete uftb_ras;
     delete uftb_plru;
 }
 
-uint32_t uftb_class::get_way(){
+uint32_t uftb_with_ras_class::get_way(){
     for(uint32_t i = 0; i < uftb_cnt; i++){
         if(uftb_entrys[i].valid == 0)
             return i;
@@ -56,7 +54,7 @@ uint32_t uftb_class::get_way(){
     return uftb_plru->plru_select_one();
 }
 
-void uftb_class::uftb_predict(ftq_class &ftq){
+void uftb_with_ras_class::uftb_predict(ftq_class &ftq){
     uint64_t start_pc = pc;
     while(ftq.full() == false){
         ftq_entry entry;
@@ -108,7 +106,7 @@ void uftb_class::uftb_predict(ftq_class &ftq){
                     entry.end_pc = end_pc;
                     entry.is_tail = false;
                     start_pc = next_pc;
-                }else if(uftb_entrys[i].always_tacken[0] | (uftb_entrys[i].tail_slot.valid & (uftb_entrys[i].tail_slot.bit2_cnt > 1))){
+                }else if((uftb_entrys[i].tail_slot.valid & (uftb_entrys[i].is_branch == false))){
                     //? tail_slot jump
                     uint64_t end_pc = (start_pc + uftb_entrys[i].tail_slot.offset);
                     if(uftb_entrys[i].tail_slot.is_rvc)
@@ -121,11 +119,15 @@ void uftb_class::uftb_predict(ftq_class &ftq){
                     else if(uftb_entrys[i].tail_slot.carry[1])
                         next_pc--;
                     next_pc = (((next_pc << 20) + uftb_entrys[i].tail_slot.next_low) << 1);
+                    if(uftb_entrys[i].is_call)
+                        uftb_ras->pred_push(next_pc);
+                    else if(uftb_entrys[i].is_ret)
+                        next_pc = uftb_ras->pred_pop();
                     entry.token = true;
                     entry.end_pc = end_pc;
                     entry.is_tail = true;
                     start_pc = next_pc;
-                }else if((uftb_entrys[i].tail_slot.valid & (uftb_entrys[i].is_branch == false))){
+                }else if(uftb_entrys[i].always_tacken[0] | (uftb_entrys[i].tail_slot.valid & (uftb_entrys[i].tail_slot.bit2_cnt > 1))){
                     //? tail_slot jump
                     uint64_t end_pc = (start_pc + uftb_entrys[i].tail_slot.offset);
                     if(uftb_entrys[i].tail_slot.is_rvc)
@@ -164,7 +166,7 @@ void uftb_class::uftb_predict(ftq_class &ftq){
     pc = start_pc;
 }
 
-void uftb_class::update(ftq_entry *result){
+void uftb_with_ras_class::update(ftq_entry *result){
     if(result->hit){
         uftb_entrys[result->hit_sel] = result->old_entry;
     }else if(result->old_entry.valid){
@@ -174,18 +176,54 @@ void uftb_class::update(ftq_entry *result){
     }
 }
 
-void uftb_class::update_pc(uint64_t pc_i, uint64_t *pop_pc, VARIABLE_IS_NOT_USED bool is_call, VARIABLE_IS_NOT_USED bool is_ret, VARIABLE_IS_NOT_USED bool is_precheck){
+void uftb_with_ras_class::update_pc(uint64_t pc_i, uint64_t *pop_pc, bool is_call, bool is_ret, bool is_precheck){
     pc = pc_i;
-    if(pop_pc != NULL)
-        *pop_pc = pc;
+    uint64_t ret_pc = pc;
+
+    if(is_precheck & is_ret){
+        ret_pc = uftb_ras->precheck_pop();
+        pc = ret_pc;
+        uftb_ras->precheck_restore();
+    }else if(is_precheck & is_call){
+        uftb_ras->precheck_push(pc_i);
+        uftb_ras->precheck_restore();
+    }else if(is_precheck){
+        uftb_ras->precheck_restore();
+    }else if(is_ret){
+        ret_pc = uftb_ras->commit_pop();
+        pc = ret_pc;
+        uftb_ras->commit_restore();
+    }else if(is_call){
+        uftb_ras->commit_push(pc_i);
+        uftb_ras->commit_restore();
+    }else{
+        uftb_ras->commit_restore();
+    }
+
+    if(pop_pc != NULL){
+        if(is_ret)
+            *pop_pc = ret_pc;
+        else
+            *pop_pc = pc;
+    }
 }
 
-void uftb_class::precheck_update_ras(VARIABLE_IS_NOT_USED uint64_t push_pc, VARIABLE_IS_NOT_USED bool is_call){}
+void uftb_with_ras_class::precheck_update_ras(uint64_t push_pc, bool is_call){
+    if(is_call)
+        uftb_ras->precheck_push(push_pc);
+    else
+        uftb_ras->_precheck_pop();
+}
 
-void uftb_class::commit_update_ras(VARIABLE_IS_NOT_USED uint64_t push_pc, VARIABLE_IS_NOT_USED bool is_call){}
+void uftb_with_ras_class::commit_update_ras(uint64_t push_pc, bool is_call){
+    if(is_call)
+        uftb_ras->commit_push(push_pc);
+    else
+        uftb_ras->_commit_pop();
+}
 
 // 全相连uftb性能仿真测试
-int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
+int bp_sim_uftb_with_ras(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
     cJSON *temp = NULL;
     temp = cJSON_GetObjectItem(conf_json, "ftq_entry_num");
     ftq_entry_num = cJSON_GetNumberValue(temp);
@@ -201,6 +239,10 @@ int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
     tag_bit_size = cJSON_GetNumberValue(temp);
     temp = cJSON_GetObjectItem(conf_json, "tag_start_bit");
     tag_start_bit = cJSON_GetNumberValue(temp);
+    temp = cJSON_GetObjectItem(conf_json, "ras_max_size");
+    ras_max_size = cJSON_GetNumberValue(temp);
+    temp = cJSON_GetObjectItem(conf_json, "sq_max_size");
+    sq_max_size = cJSON_GetNumberValue(temp);
 
     temp = cJSON_GetObjectItem(conf_json, "start_pc");
     char *start_pc_str = cJSON_GetStringValue(temp);
@@ -218,7 +260,7 @@ int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
     mmap_ptr = (uint8_t *)mmap(NULL, (size_t)bin_size, PROT_READ, MAP_SHARED, fileno(bin_fp), 0);
 
     ftq_class  uftb_ftq(ftq_entry_num);
-    uftb_class uftb(ftb_entry_num, ftb_entry_num_bit, start_pc);
+    uftb_with_ras_class uftb(ftb_entry_num, ftb_entry_num_bit, ras_max_size, sq_max_size, start_pc);
     ifu_class  uftb_ifu(false, uftb_ftq, mmap_ptr, start_pc, uftb);
     uftb_ftq.set_plru_ptr(uftb.get_uftb_plru());
     exu_class  uftb_exu(uftb_ftq, uftb, db_fp, predict_bit_size, uftb_ifu);
@@ -232,7 +274,7 @@ int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
     }
 
 out:
-    printf("uftb-test:\n");
+    printf("uftb_with_ras-test:\n");
     printf("inst_cnt is %ld-0x%lx; pred_miss is %ld-0x%lx\n", inst_cnt, inst_cnt, pred_miss, pred_miss);
     printf("miss rate is %f\n", (double)pred_miss / (double)inst_cnt);
     munmap(mmap_ptr, (size_t)bin_size);

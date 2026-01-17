@@ -5,10 +5,13 @@
 typedef struct {
     uint64_t addr;
     uint8_t  cnt;
+    uint8_t  pred_cnt;
+    uint8_t  precheck_cnt;
 }stack_entry;
 typedef struct {
     uint64_t addr;
-    uint8_t  cnt;
+    uint8_t  pred_cnt;
+    uint8_t  precheck_cnt;
     uint32_t nos;
 }queue_entry;
 
@@ -38,6 +41,14 @@ public:
     ~return_addr_stack();
     bool sq_empty();
     bool sq_full();
+    bool sq_precheck_empty();
+    bool sq_precheck_full();
+    bool stack_empty();
+    bool stack_full();
+    bool stack_precheck_empty();
+    bool stack_precheck_full();
+    bool stack_pred_empty();
+    bool stack_pred_full();
     void pred_push(uint64_t push_addr);
     uint64_t pred_pop();
     void precheck_push(uint64_t push_addr);

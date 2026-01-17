@@ -232,27 +232,30 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     result->is_tail = true;
                     result->end_pc = end_pc;
                     ftq.precheck_restore(result);
-                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr);
-                    result->next_pc = decode_result.decode[decode_result.jump_index].branch_addr;
-                }
-                else if(decode_result.has_jump & (check_result.new_entry.is_ret == false)){
+                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr, &result->next_pc, false, true, true);
+                }else if(decode_result.has_jump & check_result.new_entry.is_call){
                     result->old_entry = check_result.new_entry;
                     result->token = true;
                     result->is_tail = true;
                     result->end_pc = end_pc;
                     ftq.precheck_restore(result);
-                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr);
-                    result->next_pc = decode_result.decode[decode_result.jump_index].branch_addr;
+                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr, &result->next_pc, true, false, true);
+                }else if(decode_result.has_jump){
+                    result->old_entry = check_result.new_entry;
+                    result->token = true;
+                    result->is_tail = true;
+                    result->end_pc = end_pc;
+                    ftq.precheck_restore(result);
+                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr, &result->next_pc, false, false, true);
                 }else{
                     result->old_entry = check_result.new_entry;
                     result->token = false;
                     result->end_pc = block_pc;
                     ftq.precheck_restore(result);
-                    test.update_pc(block_pc);
+                    test.update_pc(block_pc, &result->next_pc,false, false, true);
                     if(decode_result.has_three_branch){
                         decode_result.rvi_valid = false;
                     }
-                    result->next_pc = block_pc;
                 }
             }else if((check_result.new_entry.valid) & (result->hit == true)){
                 //? 匹配错误，别名问题
@@ -262,28 +265,30 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     result->is_tail = true;
                     result->end_pc = end_pc;
                     ftq.precheck_restore(result);
-                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr);
-                    result->next_pc = decode_result.decode[decode_result.jump_index].branch_addr;
-                }
-                else if(decode_result.has_jump & (check_result.new_entry.is_ret == false)){
+                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr, &result->next_pc, false, true, true);
+                }else if(decode_result.has_jump & check_result.new_entry.is_call){
                     result->old_entry    = check_result.new_entry;
                     result->token = true;
                     result->is_tail = true;
                     result->end_pc = end_pc;
                     ftq.precheck_restore(result);
-                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr);
-                    result->next_pc = decode_result.decode[decode_result.jump_index].branch_addr;
-                    
+                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr, &result->next_pc, true, false, true);
+                }else if(decode_result.has_jump){
+                    result->old_entry    = check_result.new_entry;
+                    result->token = true;
+                    result->is_tail = true;
+                    result->end_pc = end_pc;
+                    ftq.precheck_restore(result);
+                    test.update_pc(decode_result.decode[decode_result.jump_index].branch_addr, &result->next_pc, false, false, true);
                 }else{
                     result->old_entry = check_result.new_entry;
                     result->token = false;
                     result->end_pc = block_pc;
                     ftq.precheck_restore(result);
-                    test.update_pc(block_pc);
+                    test.update_pc(block_pc, &result->next_pc, false, false, true);
                     if(decode_result.has_three_branch){
                         decode_result.rvi_valid = false;
                     }
-                    result->next_pc = result->end_pc;
                 }
             }else if(result->hit){
                 //? 别名
@@ -291,13 +296,17 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                 result->token = false;
                 result->end_pc = result->start_pc + predict_size;
                 ftq.precheck_restore(result);
-                test.update_pc(result->start_pc + predict_size);
-                result->next_pc = result->end_pc;
+                test.update_pc(result->start_pc + predict_size, &result->next_pc, false, false, true);
             }
             result->old_entry.always_tacken[0] = false;
             result->old_entry.always_tacken[1] = false;
             result->old_entry.br_slot.bit2_cnt = 0;
             result->old_entry.tail_slot.bit2_cnt = 0;
+        }else{
+            if(result->hit & result->token & result->is_tail & result->old_entry.is_call)
+                test.precheck_update_ras(decode_result.decode[decode_result.jump_index].branch_addr, true);
+            else if(result->hit & result->token & result->is_tail & result->old_entry.is_ret)
+                test.precheck_update_ras(decode_result.decode[decode_result.jump_index].branch_addr, false);
         }
         result->first_pred_flag = check_result.update;
         // if(result->issue_inst != NULL){

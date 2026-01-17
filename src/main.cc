@@ -10,9 +10,10 @@
 
 extern int bp_sim_no_bp(FILE *bin_fp, FILE *db_fp, cJSON *conf_json);
 extern int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json);
+extern int bp_sim_uftb_with_ras(FILE *bin_fp, FILE *db_fp, cJSON *conf_json);
 typedef int (*test_fn)(FILE *bin_fp, FILE *db_fp, cJSON *conf_json);
 
-test_fn test_funcs[] = {bp_sim_no_bp, bp_sim_uftb};
+test_fn test_funcs[] = {bp_sim_no_bp, bp_sim_uftb, bp_sim_uftb_with_ras};
 
 int main(int argc, char const *argv[]){
     if(argc < 2){
