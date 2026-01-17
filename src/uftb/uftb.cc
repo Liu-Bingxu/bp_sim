@@ -6,6 +6,7 @@
 #include "ifu.h"
 #include "exu.h"
 #include "uftb/uftb.h"
+#include "assert.h"
 
 static uint32_t ftq_entry_num;
 static uint32_t ftb_entry_num;
@@ -60,7 +61,8 @@ void uftb_class::uftb_predict(ftq_class &ftq){
         entry.start_pc = start_pc;
         entry.end_pc = start_pc + predict_size;
         entry.first_pred_flag = false;
-        entry.plru_status = (uint8_t *)malloc(sizeof(uint8_t) * uftb_plru->get_plru_size());
+        // entry.plru_status = (uint8_t *)malloc(sizeof(uint8_t) * uftb_plru->get_plru_size());
+        assert(uftb_plru->get_plru_size() <= PLRU_CNT);
         entry.old_entry.valid = false;
         entry.old_entry.carry = false;
         entry.old_entry.br_slot.valid  = false;

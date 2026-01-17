@@ -8,7 +8,7 @@ ftq_class::ftq_class(uint32_t count){
     commit_ptr = 0;
     cnt   = 0;
     ifu_not_use_cnt = 0;
-    plru = NULL;
+    // plru = NULL;
     // for(uint32_t i = 0; i < max_size; i++){
     //     entry[i].issue_inst = NULL;
     // }

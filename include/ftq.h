@@ -7,6 +7,8 @@
 #include "plru.h"
 #include "decode.h"
 
+#define PLRU_CNT 128
+
 typedef struct {
     // start_pc必须全部记下
     uint64_t    start_pc;
@@ -24,7 +26,7 @@ typedef struct {
     uint32_t    hit_sel;
     ftb_entry   old_entry; // precheck后一定有意义
     // plru状态，RTL中需要保存，用于冲刷（重定向）时恢复plru状态
-    uint8_t    *plru_status;
+    uint8_t     plru_status[128];
 }ftq_entry;
 
 class ftq_class{
