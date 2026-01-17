@@ -8,10 +8,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+extern int bp_sim_no_bp(FILE *bin_fp, FILE *db_fp, cJSON *conf_json);
 extern int bp_sim_uftb(FILE *bin_fp, FILE *db_fp, cJSON *conf_json);
 typedef int (*test_fn)(FILE *bin_fp, FILE *db_fp, cJSON *conf_json);
 
-test_fn test_funcs[] = {bp_sim_uftb};
+test_fn test_funcs[] = {bp_sim_no_bp, bp_sim_uftb};
 
 int main(int argc, char const *argv[]){
     if(argc < 2){
@@ -65,11 +66,24 @@ int main(int argc, char const *argv[]){
     cJSON *test_sel_json = cJSON_GetObjectItem(conf_json, "test_fn_index");
 
     cJSON *func_name = cJSON_GetObjectItem(conf_json, "bp_sim func");
-    str = cJSON_GetStringValue(func_name);
-    cJSON *test_sel_num = cJSON_GetObjectItem(test_sel_json, str);
-    int sel_num = cJSON_GetNumberValue(test_sel_num);
-    cJSON *test_conf = cJSON_GetObjectItem(conf_json, str);
-    test_funcs[sel_num](bin_fp, db_fp, test_conf);
+    if(cJSON_IsArray(func_name)){
+        cJSON *func_name_array = NULL;
+        cJSON_ArrayForEach(func_name_array, func_name){
+            fseek(bin_fp, 0, SEEK_SET);
+            fseek(db_fp, 0, SEEK_SET);
+            str = cJSON_GetStringValue(func_name_array);
+            cJSON *test_sel_num = cJSON_GetObjectItem(test_sel_json, str);
+            int sel_num = cJSON_GetNumberValue(test_sel_num);
+            cJSON *test_conf = cJSON_GetObjectItem(conf_json, str);
+            test_funcs[sel_num](bin_fp, db_fp, test_conf);
+        }
+    }else{
+        str = cJSON_GetStringValue(func_name);
+        cJSON *test_sel_num = cJSON_GetObjectItem(test_sel_json, str);
+        int sel_num = cJSON_GetNumberValue(test_sel_num);
+        cJSON *test_conf = cJSON_GetObjectItem(conf_json, str);
+        test_funcs[sel_num](bin_fp, db_fp, test_conf);
+    }
 
     fclose(db_fp);
     fclose(bin_fp);

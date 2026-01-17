@@ -1,10 +1,14 @@
 {
     "test_fn_index":{
-        "uftb": 0
+        "no_bp": 0,
+        "uftb": 1
     },
     "itrace file name": "macrobench-itrace.db",
     "bin file name": "microbench-riscv64-nemu.bin",
-    "bp_sim func": "uftb",
+    "bp_sim func": ["no_bp", "uftb"],
+    "no_bp":{
+        "start_pc": "0x80000000"
+    },
     "uftb":{
         "ftq_entry_num": 32,
         "ftb_entry_num": 32,
