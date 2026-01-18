@@ -40,11 +40,17 @@ void *plru_class::get_plru_status(){
 
 void plru_class::plru_update(uint32_t update){
     uint32_t update_res = 0;
+    uint32_t update_pos = 1;
     for(uint32_t i = 0;i < entry_bit;i++){
         uint32_t bit1 = update % 2;
         update_res = update_res * 2 + bit1;
         update /= 2;
-        entry_sel[update_res] = (bit1 == 0) ? 1 : 0;
+    }
+    for(uint32_t i = 0;i < entry_bit;i++){
+        uint32_t bit1 = update_res % 2;
+        entry_sel[update_pos - 1] = (bit1 == 0) ? 1 : 0;
+        update_pos = update_pos * 2 + bit1;
+        update_res /= 2;
     }
 }
 
