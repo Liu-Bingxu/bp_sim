@@ -116,10 +116,9 @@ bool exu_class::execute(uint64_t &inst_cnt, uint64_t &pred_miss){
                     ftq.commit_restore(result, pc, push_pc, NULL, is_call, is_ret);
                     ifu.set_rvi_status(false);
                     pred_miss++;
-                }
-                if(result->token & (token_offset == (result->issue_inst[inst_index].inst_pc - result->start_pc)) & is_call){
+                }else if(result->token & is_call){
                     test.commit_update_ras(push_pc, true);
-                }else if(result->token & (token_offset == (result->issue_inst[inst_index].inst_pc - result->start_pc)) & is_ret){
+                }else if(result->token & is_ret){
                     test.commit_update_ras(pc, false);
                 }
                 break;
