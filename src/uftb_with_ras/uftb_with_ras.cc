@@ -122,7 +122,7 @@ void uftb_with_ras_class::uftb_predict(ftq_class &ftq){
                     if(uftb_entrys[i].is_call)
                         uftb_ras->pred_push(end_pc);
                     else if(uftb_entrys[i].is_ret)
-                        next_pc = uftb_ras->pred_pop();
+                        next_pc = uftb_ras->pred_pop(next_pc);
                     entry.token = true;
                     entry.end_pc = end_pc;
                     entry.is_tail = true;
@@ -193,7 +193,7 @@ void uftb_with_ras_class::update_pc(uint64_t pc_i, uint64_t push_pc, uint64_t *p
     uint64_t ret_pc = pc;
 
     if(is_precheck & is_ret){
-        ret_pc = uftb_ras->precheck_pop();
+        ret_pc = uftb_ras->precheck_pop(pc);
         pc = ret_pc;
         uftb_ras->precheck_restore();
     }else if(is_precheck & is_call){
@@ -202,8 +202,7 @@ void uftb_with_ras_class::update_pc(uint64_t pc_i, uint64_t push_pc, uint64_t *p
     }else if(is_precheck){
         uftb_ras->precheck_restore();
     }else if(is_ret){
-        ret_pc = uftb_ras->commit_pop();
-        pc = ret_pc;
+        uftb_ras->commit_pop();
         uftb_ras->commit_restore();
     }else if(is_call){
         uftb_ras->commit_push(push_pc);
@@ -231,7 +230,7 @@ void uftb_with_ras_class::commit_update_ras(uint64_t push_pc, bool is_call){
     if(is_call)
         uftb_ras->commit_push(push_pc);
     else
-        uftb_ras->_commit_pop();
+        uftb_ras->commit_pop();
 }
 
 // 全相连uftb性能仿真测试

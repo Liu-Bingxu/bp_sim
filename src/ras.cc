@@ -71,10 +71,11 @@ bool return_addr_stack::stack_pred_full(){
 }
 
 void return_addr_stack::pred_push(uint64_t push_addr){
+    uint32_t last_commit_ptr = ((ras.ssp + max_size_ras - 1) % max_size_ras);
     if((sq_empty() == false) & (sq.entry[sq.tosr].addr == push_addr) & (sq.entry[sq.tosr].pred_cnt < 255)){
         sq.entry[sq.tosr].pred_cnt++;
+        ras.entry[last_commit_ptr].pred_cnt++;
     }else if(sq_full()){
-        assert(0);
         sq.entry[sq.bos].pred_cnt = 0;
         sq.entry[sq.tosw].addr = push_addr;
         sq.entry[sq.tosw].pred_cnt = 1;
@@ -82,22 +83,33 @@ void return_addr_stack::pred_push(uint64_t push_addr){
         sq.tosr = sq.tosw;
         sq.tosw = sq.bos;
         sq.bos  = ((sq.bos  + 1) % max_size_sq);
+        ras.entry[ras.ssp].pred_cnt = 1;
+        ras.ssp = ((ras.ssp + 1) % max_size_ras);
+        ras.entry[ras.ssp].pred_cnt = 0;
     }else{
         sq.entry[sq.tosw].addr = push_addr;
         sq.entry[sq.tosw].pred_cnt = 1;
         sq.entry[sq.tosw].nos = sq.tosr;
         sq.tosr = sq.tosw;
         sq.tosw = ((sq.tosw + 1) % max_size_sq);
+        ras.entry[ras.ssp].pred_cnt = 1;
+        ras.ssp = ((ras.ssp + 1) % max_size_ras);
+        ras.entry[ras.ssp].pred_cnt = 0;
     }
 }
 
-uint64_t return_addr_stack::pred_pop(){
+uint64_t return_addr_stack::pred_pop(uint64_t next_addr){
     uint32_t last_commit_ptr = ((ras.ssp + max_size_ras - 1) % max_size_ras);
     if(sq_empty() == false){
         uint64_t ret_pc = sq.entry[sq.tosr].addr;
         sq.entry[sq.tosr].pred_cnt--;
         if(sq.entry[sq.tosr].pred_cnt == 0){
             sq.tosr = sq.entry[sq.tosr].nos;
+            ras.ssp = last_commit_ptr;
+        }
+        ras.entry[last_commit_ptr].pred_cnt--;
+        if(ras.entry[last_commit_ptr].pred_cnt == 0){
+            ras.ssp = last_commit_ptr;
         }
         return ret_pc;
     }
@@ -109,14 +121,15 @@ uint64_t return_addr_stack::pred_pop(){
         }
         return ret_pc;
     }
-    return 0x80000000;
+    return next_addr;
 }
 
 void return_addr_stack::precheck_push(uint64_t push_addr){
+    uint32_t last_commit_ptr = ((ras.psp + max_size_ras - 1) % max_size_ras);
     if((sq_precheck_empty() == false) & (sq.entry[sq.ptosr].addr == push_addr) & (sq.entry[sq.ptosr].precheck_cnt < 255)){
         sq.entry[sq.ptosr].precheck_cnt++;
+        ras.entry[last_commit_ptr].pred_cnt++;
     }else if(sq_precheck_full()){
-        assert(0);
         sq.entry[sq.bos].precheck_cnt = 0;
         sq.entry[sq.ptosw].addr = push_addr;
         sq.entry[sq.ptosw].precheck_cnt = 1;
@@ -124,22 +137,33 @@ void return_addr_stack::precheck_push(uint64_t push_addr){
         sq.ptosr = sq.ptosw;
         sq.ptosw = sq.bos;
         sq.bos  = ((sq.bos  + 1) % max_size_sq);
+        ras.entry[ras.psp].pred_cnt = 1;
+        ras.psp = ((ras.psp + 1) % max_size_ras);
+        ras.entry[ras.psp].pred_cnt = 0;
     }else{
         sq.entry[sq.ptosw].addr = push_addr;
         sq.entry[sq.ptosw].precheck_cnt = 1;
         sq.entry[sq.ptosw].nos = sq.ptosr;
         sq.ptosr = sq.ptosw;
         sq.ptosw = ((sq.ptosw + 1) % max_size_sq);
+        ras.entry[ras.psp].pred_cnt = 1;
+        ras.psp = ((ras.psp + 1) % max_size_ras);
+        ras.entry[ras.psp].pred_cnt = 0;
     }
 }
 
-uint64_t return_addr_stack::precheck_pop(){
+uint64_t return_addr_stack::precheck_pop(uint64_t next_addr){
     uint32_t last_commit_ptr = ((ras.psp + max_size_ras - 1) % max_size_ras);
     if(sq_precheck_empty() == false){
         uint64_t ret_pc = sq.entry[sq.ptosr].addr;
         sq.entry[sq.ptosr].precheck_cnt--;
         if(sq.entry[sq.ptosr].precheck_cnt == 0){
             sq.ptosr = sq.entry[sq.ptosr].nos;
+            ras.psp = last_commit_ptr;
+        }
+        ras.entry[last_commit_ptr].precheck_cnt--;
+        if(ras.entry[last_commit_ptr].precheck_cnt == 0){
+            ras.psp = last_commit_ptr;
         }
         return ret_pc;
     }
@@ -151,7 +175,7 @@ uint64_t return_addr_stack::precheck_pop(){
         }
         return ret_pc;
     }
-    return 0x80000000;
+    return next_addr;
 }
 
 void return_addr_stack::_precheck_pop(){
@@ -160,6 +184,11 @@ void return_addr_stack::_precheck_pop(){
         sq.entry[sq.ptosr].precheck_cnt--;
         if(sq.entry[sq.ptosr].precheck_cnt == 0){
             sq.ptosr = sq.entry[sq.ptosr].nos;
+            ras.psp = last_commit_ptr;
+        }
+        ras.entry[last_commit_ptr].precheck_cnt--;
+        if(ras.entry[last_commit_ptr].precheck_cnt == 0){
+            ras.psp = last_commit_ptr;
         }
     }
     else if(stack_precheck_empty() == false){
@@ -178,7 +207,6 @@ void return_addr_stack::commit_push(uint64_t push_addr){
     if((stack_empty() == false) & (ras.entry[last_commit_ptr].addr == push_addr) & (ras.entry[last_commit_ptr].cnt < 255)){
         ras.entry[last_commit_ptr].cnt++;
     }else if(stack_full()){
-        assert(0);
         ras.entry[ras.bos].cnt = 0;
         ras.entry[ras.nsp].addr = push_addr;
         ras.entry[ras.nsp].cnt  = 1;
@@ -191,20 +219,7 @@ void return_addr_stack::commit_push(uint64_t push_addr){
     }
 }
 
-uint64_t return_addr_stack::commit_pop(){
-    uint32_t last_commit_ptr = ((ras.nsp + max_size_ras - 1) % max_size_ras);
-    if(stack_empty() == false){
-        uint64_t ret_pc = ras.entry[last_commit_ptr].addr;
-        ras.entry[last_commit_ptr].cnt--;
-        if(ras.entry[last_commit_ptr].cnt == 0){
-            ras.nsp = last_commit_ptr;
-        }
-        return ret_pc;
-    }
-    return 0x80000000;
-}
-
-void return_addr_stack::_commit_pop(){
+void return_addr_stack::commit_pop(){
     uint32_t last_commit_ptr = ((ras.nsp + max_size_ras - 1) % max_size_ras);
     if(stack_empty() == false){
         ras.entry[last_commit_ptr].cnt--;
