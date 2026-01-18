@@ -1,6 +1,7 @@
 #include "ras.h"
 #include "stdlib.h"
 #include "assert.h"
+#include "stdio.h"
 
 return_addr_stack::return_addr_stack(uint32_t max_size_ras_i, uint32_t max_size_sq_i){
     max_size_ras = max_size_ras_i;
@@ -91,6 +92,7 @@ void return_addr_stack::pred_push(uint64_t push_addr){
 }
 
 uint64_t return_addr_stack::pred_pop(){
+    uint32_t last_commit_ptr = ((ras.ssp + max_size_ras - 1) % max_size_ras);
     if(sq_empty() == false){
         uint64_t ret_pc = sq.entry[sq.tosr].addr;
         sq.entry[sq.tosr].pred_cnt--;
@@ -100,10 +102,10 @@ uint64_t return_addr_stack::pred_pop(){
         return ret_pc;
     }
     else if(stack_pred_empty() == false){
-        uint64_t ret_pc = ras.entry[ras.ssp].addr;
-        ras.entry[ras.ssp].pred_cnt--;
-        if(ras.entry[ras.ssp].pred_cnt == 0){
-            ras.ssp = ((ras.ssp + max_size_ras - 1) % max_size_ras);
+        uint64_t ret_pc = ras.entry[last_commit_ptr].addr;
+        ras.entry[last_commit_ptr].pred_cnt--;
+        if(ras.entry[last_commit_ptr].pred_cnt == 0){
+            ras.ssp = last_commit_ptr;
         }
         return ret_pc;
     }
@@ -132,6 +134,7 @@ void return_addr_stack::precheck_push(uint64_t push_addr){
 }
 
 uint64_t return_addr_stack::precheck_pop(){
+    uint32_t last_commit_ptr = ((ras.psp + max_size_ras - 1) % max_size_ras);
     if(sq_precheck_empty() == false){
         uint64_t ret_pc = sq.entry[sq.ptosr].addr;
         sq.entry[sq.ptosr].precheck_cnt--;
@@ -141,10 +144,10 @@ uint64_t return_addr_stack::precheck_pop(){
         return ret_pc;
     }
     else if(stack_precheck_empty() == false){
-        uint64_t ret_pc = ras.entry[ras.psp].addr;
-        ras.entry[ras.psp].precheck_cnt--;
-        if(ras.entry[ras.psp].precheck_cnt == 0){
-            ras.psp = ((ras.psp + max_size_ras - 1) % max_size_ras);
+        uint64_t ret_pc = ras.entry[last_commit_ptr].addr;
+        ras.entry[last_commit_ptr].precheck_cnt--;
+        if(ras.entry[last_commit_ptr].precheck_cnt == 0){
+            ras.psp = last_commit_ptr;
         }
         return ret_pc;
     }
@@ -152,6 +155,7 @@ uint64_t return_addr_stack::precheck_pop(){
 }
 
 void return_addr_stack::_precheck_pop(){
+    uint32_t last_commit_ptr = ((ras.psp + max_size_ras - 1) % max_size_ras);
     if(sq_precheck_empty() == false){
         sq.entry[sq.ptosr].precheck_cnt--;
         if(sq.entry[sq.ptosr].precheck_cnt == 0){
@@ -159,9 +163,9 @@ void return_addr_stack::_precheck_pop(){
         }
     }
     else if(stack_precheck_empty() == false){
-        ras.entry[ras.psp].precheck_cnt--;
-        if(ras.entry[ras.psp].precheck_cnt == 0){
-            ras.psp = ((ras.psp + max_size_ras - 1) % max_size_ras);
+        ras.entry[last_commit_ptr].precheck_cnt--;
+        if(ras.entry[last_commit_ptr].precheck_cnt == 0){
+            ras.psp = last_commit_ptr;
         }
     }
 }
