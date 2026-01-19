@@ -19,9 +19,12 @@ return_addr_stack::return_addr_stack(uint32_t max_size_ras_i, uint32_t max_size_
     sq.entry     = (queue_entry *)malloc(sizeof(queue_entry) * max_size_sq);
     for(uint32_t i = 0; i < max_size_ras; i++){
         ras.entry[i].cnt = 0;
+        ras.entry[i].pred_cnt = 0;
+        ras.entry[i].precheck_cnt = 0;
     }
     for(uint32_t i = 0; i < max_size_sq; i++){
         sq.entry[i].pred_cnt = 0;
+        sq.entry[i].precheck_cnt = 0;
     }
 }
 
