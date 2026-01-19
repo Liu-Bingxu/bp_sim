@@ -13,8 +13,6 @@
 class ftq_class{
     uint32_t    max_size;
     ftq_entry  *entry;
-    uint32_t    cnt;
-    uint32_t    ifu_not_use_cnt;
     uint32_t    bpu_w_ptr;
     uint32_t    ifu_r_ptr;
     uint32_t    commit_ptr;
