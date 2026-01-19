@@ -108,7 +108,6 @@ uint64_t return_addr_stack::pred_pop(uint64_t next_addr){
         sq.entry[sq.tosr].pred_cnt--;
         if(sq.entry[sq.tosr].pred_cnt == 0){
             sq.tosr = sq.entry[sq.tosr].nos;
-            ras.ssp = last_commit_ptr;
         }
         ras.entry[last_commit_ptr].pred_cnt--;
         if(ras.entry[last_commit_ptr].pred_cnt == 0){
@@ -162,7 +161,6 @@ uint64_t return_addr_stack::precheck_pop(uint64_t next_addr){
         sq.entry[sq.ptosr].precheck_cnt--;
         if(sq.entry[sq.ptosr].precheck_cnt == 0){
             sq.ptosr = sq.entry[sq.ptosr].nos;
-            ras.psp = last_commit_ptr;
         }
         ras.entry[last_commit_ptr].precheck_cnt--;
         if(ras.entry[last_commit_ptr].precheck_cnt == 0){
@@ -187,7 +185,6 @@ void return_addr_stack::_precheck_pop(){
         sq.entry[sq.ptosr].precheck_cnt--;
         if(sq.entry[sq.ptosr].precheck_cnt == 0){
             sq.ptosr = sq.entry[sq.ptosr].nos;
-            ras.psp = last_commit_ptr;
         }
         ras.entry[last_commit_ptr].precheck_cnt--;
         if(ras.entry[last_commit_ptr].precheck_cnt == 0){
