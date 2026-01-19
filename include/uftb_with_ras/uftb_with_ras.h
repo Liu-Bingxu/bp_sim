@@ -14,7 +14,7 @@ private:
     ras_class  *uftb_ras;
     plru_class *uftb_plru;
     uint32_t get_way();
-    uint32_t    pc;
+    uint64_t    pc;
 public:
     uftb_with_ras_class(uint32_t ftb_entry_num_i, uint32_t ftb_entry_num_bit_i, uint32_t ras_max_size_i, uint32_t sq_max_size_i, uint32_t pc_i);
     ~uftb_with_ras_class();
