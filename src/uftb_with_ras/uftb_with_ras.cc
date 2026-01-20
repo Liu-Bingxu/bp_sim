@@ -47,10 +47,6 @@ uftb_with_ras_class::~uftb_with_ras_class(){
 }
 
 uint32_t uftb_with_ras_class::get_way(){
-    for(uint32_t i = 0; i < uftb_cnt; i++){
-        if(uftb_entrys[i].valid == 0)
-            return i;
-    }
     return uftb_plru->plru_select_one();
 }
 
@@ -166,7 +162,6 @@ void uftb_with_ras_class::uftb_predict(ftq_class &ftq){
 void uftb_with_ras_class::update(ftq_entry *result){
     if(result->hit){
         uftb_entrys[result->hit_sel] = result->old_entry;
-        uftb_plru->plru_update(result->hit_sel);
     }else if(result->old_entry.valid){
         uint32_t i = 0;
         uint64_t tag = ((result->start_pc >> tag_start_bit) & (((uint64_t)0x1 << tag_bit_size) - (uint32_t)1));
@@ -176,7 +171,6 @@ void uftb_with_ras_class::update(ftq_entry *result){
         }
         if(i != uftb_cnt){
             uftb_entrys[i] = result->old_entry;
-            uftb_plru->plru_update(i);
         }else{
             uint32_t way_sel = get_way();
             uftb_entrys[way_sel] = result->old_entry;
