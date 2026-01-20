@@ -45,20 +45,14 @@ ftq_entry *ftq_class::commit_queue_get_top(){
     return &entry[(commit_ptr % max_size)];
 }
 
-void ftq_class::set_plru_ptr(plru_class *plru_i){
-    plru = plru_i;
-}
-
-void ftq_class::precheck_restore(ftq_entry *entry_i, uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret){
+void ftq_class::precheck_restore(uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret){
     bpu_w_ptr = ((ifu_r_ptr + 1) % (max_size * 2));
-    plru->plru_restore(entry_i->plru_status);
     test_top.update_pc(pc, push_pc, pop_pc, is_call, is_ret, true);
 }
 
-void ftq_class::commit_restore(ftq_entry *entry_i, uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret){
+void ftq_class::commit_restore(uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret){
     bpu_w_ptr = ((commit_ptr + 1) % (max_size * 2));
     ifu_r_ptr = bpu_w_ptr;
-    plru->plru_restore(entry_i->plru_status);
     test_top.update_pc(pc, push_pc, pop_pc, is_call, is_ret, false);
 }
 

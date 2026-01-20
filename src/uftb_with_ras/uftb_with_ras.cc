@@ -66,8 +66,6 @@ void uftb_with_ras_class::uftb_predict(ftq_class &ftq){
         entry.end_pc = start_pc + predict_size;
         entry.next_pc = entry.end_pc;
         entry.first_pred_flag = false;
-        // entry.plru_status = (uint8_t *)malloc(sizeof(uint8_t) * uftb_plru->get_plru_size());
-        assert(uftb_plru->get_plru_size() <= PLRU_CNT);
         entry.old_entry.valid = false;
         entry.old_entry.carry = false;
         entry.old_entry.br_slot.valid  = false;
@@ -160,7 +158,6 @@ void uftb_with_ras_class::uftb_predict(ftq_class &ftq){
         if(entry.hit == false){
             start_pc = start_pc + predict_size;
         }
-        memcpy(entry.plru_status, uftb_plru->get_plru_status(), uftb_plru->get_plru_size() * sizeof(uint8_t));
         ftq.enqueue(&entry);
     }
     pc = start_pc;
@@ -273,7 +270,6 @@ int bp_sim_uftb_with_ras(FILE *bin_fp, FILE *db_fp, cJSON *conf_json){
     uftb_with_ras_class uftb(ftb_entry_num, ftb_entry_num_bit, ras_max_size, sq_max_size, start_pc);
     ftq_class  uftb_ftq(ftq_entry_num, uftb);
     ifu_class  uftb_ifu(false, uftb_ftq, mmap_ptr, start_pc);
-    uftb_ftq.set_plru_ptr(uftb.get_uftb_plru());
     exu_class  uftb_exu(uftb_ftq, uftb, db_fp, predict_bit_size, uftb_ifu);
 
     while(true){

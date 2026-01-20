@@ -19,9 +19,6 @@ public:
     uftb_with_ras_class(uint32_t ftb_entry_num_i, uint32_t ftb_entry_num_bit_i, uint32_t ras_max_size_i, uint32_t sq_max_size_i, uint32_t pc_i);
     ~uftb_with_ras_class();
     void uftb_predict(ftq_class &ftq);
-    inline plru_class *get_uftb_plru(){
-        return uftb_plru;
-    };
     virtual void update(ftq_entry *result);
     virtual void update_pc(uint64_t pc_i, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret, bool is_precheck);
     virtual void precheck_update_ras(uint64_t push_pc, bool is_call);

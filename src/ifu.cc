@@ -209,24 +209,24 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     result->token = true;
                     result->is_tail = true;
                     result->end_pc = end_pc;
-                    ftq.precheck_restore(result, decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, false, true);
+                    ftq.precheck_restore(decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, false, true);
                 }else if(decode_result.has_jump & check_result.new_entry.is_call){
                     result->old_entry = check_result.new_entry;
                     result->token = true;
                     result->is_tail = true;
                     result->end_pc = end_pc;
-                    ftq.precheck_restore(result, decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, true, false);
+                    ftq.precheck_restore(decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, true, false);
                 }else if(decode_result.has_jump){
                     result->old_entry = check_result.new_entry;
                     result->token = true;
                     result->is_tail = true;
                     result->end_pc = end_pc;
-                    ftq.precheck_restore(result, decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, false, false);
+                    ftq.precheck_restore(decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, false, false);
                 }else{
                     result->old_entry = check_result.new_entry;
                     result->token = false;
                     result->end_pc = block_pc;
-                    ftq.precheck_restore(result, block_pc, end_pc, &result->next_pc, false, false);
+                    ftq.precheck_restore(block_pc, end_pc, &result->next_pc, false, false);
                     if(decode_result.has_three_branch){
                         decode_result.rvi_valid = false;
                     }
@@ -238,24 +238,24 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                     result->token = true;
                     result->is_tail = true;
                     result->end_pc = end_pc;
-                    ftq.precheck_restore(result, decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, false, true);
+                    ftq.precheck_restore(decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, false, true);
                 }else if(decode_result.has_jump & check_result.new_entry.is_call){
                     result->old_entry    = check_result.new_entry;
                     result->token = true;
                     result->is_tail = true;
                     result->end_pc = end_pc;
-                    ftq.precheck_restore(result, decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, true, false);
+                    ftq.precheck_restore(decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, true, false);
                 }else if(decode_result.has_jump){
                     result->old_entry    = check_result.new_entry;
                     result->token = true;
                     result->is_tail = true;
                     result->end_pc = end_pc;
-                    ftq.precheck_restore(result, decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, false, false);
+                    ftq.precheck_restore(decode_result.decode[decode_result.jump_index].branch_addr, end_pc, &result->next_pc, false, false);
                 }else{
                     result->old_entry = check_result.new_entry;
                     result->token = false;
                     result->end_pc = block_pc;
-                    ftq.precheck_restore(result, block_pc, end_pc, &result->next_pc, false, false);
+                    ftq.precheck_restore(block_pc, end_pc, &result->next_pc, false, false);
                     if(decode_result.has_three_branch){
                         decode_result.rvi_valid = false;
                     }
@@ -265,7 +265,7 @@ void ifu_class::fetch_code_check(uint32_t tag_start_bit, uint32_t tag_bit_size, 
                 result->old_entry = check_result.new_entry;
                 result->token = false;
                 result->end_pc = result->start_pc + predict_size;
-                ftq.precheck_restore(result, result->start_pc + predict_size, end_pc, &result->next_pc, false, false);
+                ftq.precheck_restore(result->start_pc + predict_size, end_pc, &result->next_pc, false, false);
             }
             result->old_entry.always_tacken[0] = false;
             result->old_entry.always_tacken[1] = false;

@@ -16,7 +16,6 @@ class ftq_class{
     uint32_t    bpu_w_ptr;
     uint32_t    ifu_r_ptr;
     uint32_t    commit_ptr;
-    plru_class *plru;
     test_base_class &test_top;
 public:
     ftq_class(uint32_t count, test_base_class &test_top_i);
@@ -29,9 +28,8 @@ public:
     void ifu_use_mark();
     ftq_entry *ifu_queue_get_top();
     ftq_entry *commit_queue_get_top();
-    void set_plru_ptr(plru_class *plru_i);
-    void precheck_restore(ftq_entry *entry_i, uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret);
-    void commit_restore(ftq_entry *entry_i, uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret);
+    void precheck_restore(uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret);
+    void commit_restore(uint64_t pc, uint64_t push_pc, uint64_t *pop_pc, bool is_call, bool is_ret);
     void precheck_update_ras(uint64_t push_pc, bool is_call);
     void commit_update_ras(uint64_t push_pc, bool is_call);
 };

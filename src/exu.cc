@@ -109,11 +109,11 @@ bool exu_class::execute(uint64_t &inst_cnt, uint64_t &pred_miss){
                 else
                     push_pc += 4;
                 if(result->token == false){
-                    ftq.commit_restore(result, pc, push_pc, NULL, is_call, is_ret);
+                    ftq.commit_restore(pc, push_pc, NULL, is_call, is_ret);
                     ifu.set_rvi_status(false);
                     pred_miss++;
                 }else if((result->next_pc != pc) | (inst_index != (result->issue_cnt - 1))){
-                    ftq.commit_restore(result, pc, push_pc, NULL, is_call, is_ret);
+                    ftq.commit_restore(pc, push_pc, NULL, is_call, is_ret);
                     ifu.set_rvi_status(false);
                     pred_miss++;
                 }else if(result->token & is_call){
@@ -124,9 +124,9 @@ bool exu_class::execute(uint64_t &inst_cnt, uint64_t &pred_miss){
                 break;
             }else if((token_offset == (result->issue_inst[inst_index].inst_pc - result->start_pc)) & result->token & (jump == false)){
                 if(rvc)
-                    ftq.commit_restore(result, result->issue_inst[inst_index].inst_pc + 2, 0, NULL, false, false);
+                    ftq.commit_restore(result->issue_inst[inst_index].inst_pc + 2, 0, NULL, false, false);
                 else 
-                    ftq.commit_restore(result, result->issue_inst[inst_index].inst_pc + 4, 0, NULL, false, false);
+                    ftq.commit_restore(result->issue_inst[inst_index].inst_pc + 4, 0, NULL, false, false);
                 ifu.set_rvi_status(false);
                 pred_miss++;
             }

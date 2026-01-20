@@ -30,14 +30,6 @@ uint32_t plru_class::plru_select_one(){
     return ret;
 }
 
-uint32_t plru_class::get_plru_size(){
-    return (entry_num - 1);
-}
-
-void *plru_class::get_plru_status(){
-    return (void *)entry_sel;
-}
-
 void plru_class::plru_update(uint32_t update){
     uint32_t update_res = 0;
     uint32_t update_pos = 1;
@@ -52,8 +44,4 @@ void plru_class::plru_update(uint32_t update){
         update_pos = update_pos * 2 + bit1;
         update_res /= 2;
     }
-}
-
-void plru_class::plru_restore(uint8_t *restore_data){
-    memcpy(entry_sel, restore_data, (entry_num - 1));
 }

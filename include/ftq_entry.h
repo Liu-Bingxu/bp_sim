@@ -21,8 +21,6 @@ typedef struct {
     // 以下是hit有效时才有意义的元素
     uint32_t    hit_sel;
     ftb_entry   old_entry; // precheck后一定有意义
-    // plru状态，RTL中需要保存，用于冲刷（重定向）时恢复plru状态
-    uint8_t     plru_status[128];
 }ftq_entry;
 
 #endif
